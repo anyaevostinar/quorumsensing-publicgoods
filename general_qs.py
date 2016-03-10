@@ -31,15 +31,18 @@ class Organism:
         parent.generation += 1
         parent.repo_age = parent.age
         self.generation = parent.generation
-        parent.mutate()
+
         parent.points = 0
+        parent.mutate()
+
         parent.age = 0
       else:
         #If this organism isn't being mutated, we need to set it's ai_produce here
         self.ai_produce = (random.random() < self.ai_prob)
         if self.ai_produce:
           self.points = signal_cost
-          
+
+
         
   def __repr__(self):
     # Using string formatting
@@ -75,7 +78,7 @@ class Organism:
     self.ai_produce = (random.random() < self.ai_prob)
     if self.ai_produce:
       self.points = signal_cost
-
+      
 
     
       
@@ -190,6 +193,8 @@ class Population:
     self.orgs[position] = newOrg
     self.select_dict[newOrg.lineage] += newOrg.points
 
+    self.select_dict[org.lineage] += org.points
+
 
   def update(self):
     '''A function that runs a single update'''
@@ -201,10 +206,13 @@ class Population:
         assert isinstance(result, list), "Result returned by organism must be a list"
         #track the decrease to the producer
         self.select_dict[org.lineage] += production_cost
+
         for neighbor_id in result:
           neighbor = self.orgs[neighbor_id]
           self.select_dict[neighbor.lineage] += public_good_points
+
           neighbor.points += public_good_points
+
 
     for org in self.orgs:
         if org.points >= 10:
