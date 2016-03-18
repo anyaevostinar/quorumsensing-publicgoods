@@ -225,18 +225,21 @@ class Population:
     coop_prob_sum = 0.0
     neigh_prop_sum = 0.0
     repo_age_sum = 0.0
+    counts = ["defector":0.0, "wt": 0.0, "ancestor":0.0, "uncond":0.0]
+
     for org in self.orgs:
       if not org.empty:
         ai_prob_sum += org.ai_prob
         coop_prob_sum += org.coop_prob
         neigh_prop_sum += org.neigh_prop
         repo_age_sum += org.repo_age
+        counts[org.lineage] += 1
         total+=1
 
     if total == 0:
-      return 0, 0, 0 , 0, 0
+      return 0, 0, 0 , 0, 0, counts
     else:
-      return (ai_prob_sum/total), (coop_prob_sum/total), (neigh_prop_sum/total), (repo_age_sum/total), total
+      return (ai_prob_sum/total), (coop_prob_sum/total), (neigh_prop_sum/total), (repo_age_sum/total), total, counts
 
 def parseArgs(parser):
   '''A function for parsing the arguments.'''
@@ -285,10 +288,10 @@ for u in range(num_updates):
   if u%100 == 0:
 
       #grab current averages
-    ai_prob, coop_prob, neigh_prop, age_avg, total = population_orgs.recordStats()
+    ai_prob, coop_prob, neigh_prop, age_avg, total, counts = population_orgs.recordStats()
     print "Update: ", u, " AI Prob: ", ai_prob, " Coop Prob: ", coop_prob, " Neighbor Prop: ", neigh_prop, " Avg Repo Age: ", age_avg, " Total Orgs: ", total
     data_file = open(filename+str(seed)+".dat", 'a')
-    data_file.write('{} {} {} {} {} {} {} {} {}\n'.format(u, ai_prob, coop_prob, neigh_prop, age_avg, total, population_orgs.select_dict['defector'], population_orgs.select_dict['wt'], population_orgs.select_dict['uncond']))
+    data_file.write('{} {} {} {} {} {} {} {} {}\n'.format(u, ai_prob, coop_prob, neigh_prop, age_avg, total, population_orgs.select_dict['defector']/counts['defector'], population_orgs.select_dict['wt']/counts['wt'], population_orgs.select_dict['uncond']/counts['uncond']))
     population_orgs.select_dict = population_orgs.select_dict.fromkeys(population_orgs.select_dict, 0)
     data_file.close()
     if total == 0:
