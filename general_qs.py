@@ -122,7 +122,7 @@ class Population:
     self.orgs = []
     self.pop_size = popsize
     #dictionary to count the bonuses and costs for each type of organism
-    self.select_dict = {'defector':0, 'wt':0, 'uncond':0, 'empty':0}
+    self.select_dict = {'defector':0, 'wt':0, 'uncond':0, 'empty':0, 'ancestor':0}
 
     
     non_empty = 0
@@ -225,7 +225,7 @@ class Population:
     coop_prob_sum = 0.0
     neigh_prop_sum = 0.0
     repo_age_sum = 0.0
-    counts = {"defector":0.0, "wt": 0.0, "ancestor":0.0, "uncond":0.0}
+    counts = {"defector":0.0, "wt": 0.0, "ancestor":0.0, "uncond":0.0, "empty":0.0, "ancestor":0.0}
 
     for org in self.orgs:
       if not org.empty:
@@ -291,7 +291,20 @@ for u in range(num_updates):
     ai_prob, coop_prob, neigh_prop, age_avg, total, counts = population_orgs.recordStats()
     print "Update: ", u, " AI Prob: ", ai_prob, " Coop Prob: ", coop_prob, " Neighbor Prop: ", neigh_prop, " Avg Repo Age: ", age_avg, " Total Orgs: ", total
     data_file = open(filename+str(seed)+".dat", 'a')
-    data_file.write('{} {} {} {} {} {} {} {} {}\n'.format(u, ai_prob, coop_prob, neigh_prop, age_avg, total, population_orgs.select_dict['defector']/counts['defector'], population_orgs.select_dict['wt']/counts['wt'], population_orgs.select_dict['uncond']/counts['uncond']))
+
+    if counts['defector']:
+      def_avg = population_orgs.select_dict['defector']/counts['defector']
+    else:
+      def_avg = 0
+    if counts['wt']:
+      wt_avg = population_orgs.select_dict['wt']/counts['wt']
+    else:
+      wt_avg = 0
+    if counts['uncond']:
+      uncond_avg =  population_orgs.select_dict['uncond']/counts['uncond']
+    else:
+      uncond_avg = 0
+    data_file.write('{} {} {} {} {} {} {} {} {}\n'.format(u, ai_prob, coop_prob, neigh_prop, age_avg, total, def_avg, wt_avg, uncond_avg))
     population_orgs.select_dict = population_orgs.select_dict.fromkeys(population_orgs.select_dict, 0)
     data_file.close()
     if total == 0:
