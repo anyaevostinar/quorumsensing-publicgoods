@@ -190,7 +190,7 @@ class Population:
       position = dead_neighbor
     else:
       position = random.choice(neighbors)'''
-    position = random.randrange(self.popsize)
+    position = random.randrange(self.pop_size)
     newOrg = Organism(position, parent = org)
 
     self.orgs[position] = newOrg
