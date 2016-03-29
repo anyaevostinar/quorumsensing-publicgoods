@@ -226,6 +226,7 @@ class Population:
     neigh_prop_sum = 0.0
     repo_age_sum = 0.0
     counts = {"defector":0.0, "wt": 0.0, "ancestor":0.0, "uncond":0.0, "empty":0.0, "ancestor":0.0}
+    fitnesses = {"defector":0.0, "wt":0.0, "ancestor":0.0, "uncond":0.0, "empty":0.0}
 
     for org in self.orgs:
       if not org.empty:
@@ -234,12 +235,13 @@ class Population:
         neigh_prop_sum += org.neigh_prop
         repo_age_sum += org.repo_age
         counts[org.lineage] += 1
+        fitnesses[org.lineage] += org.points
         total+=1
 
     if total == 0:
-      return 0, 0, 0 , 0, 0, counts
+      return 0, 0, 0 , 0, 0, counts, fitnesses
     else:
-      return (ai_prob_sum/total), (coop_prob_sum/total), (neigh_prop_sum/total), (repo_age_sum/total), total, counts
+      return (ai_prob_sum/total), (coop_prob_sum/total), (neigh_prop_sum/total), (repo_age_sum/total), total, counts, fitnesses
 
 def parseArgs(parser):
   '''A function for parsing the arguments.'''
@@ -288,20 +290,20 @@ for u in range(num_updates):
   if u%100 == 0:
 
       #grab current averages
-    ai_prob, coop_prob, neigh_prop, age_avg, total, counts = population_orgs.recordStats()
+    ai_prob, coop_prob, neigh_prop, age_avg, total, counts, fitnesses = population_orgs.recordStats()
     print "Update: ", u, " AI Prob: ", ai_prob, " Coop Prob: ", coop_prob, " Neighbor Prop: ", neigh_prop, " Avg Repo Age: ", age_avg, " Total Orgs: ", total
     data_file = open(filename+str(seed)+".dat", 'a')
 
     if counts['defector']:
-      def_avg = population_orgs.select_dict['defector']/counts['defector']
+      def_avg = fitnesses['defector']/counts['defector']
     else:
       def_avg = 0
     if counts['wt']:
-      wt_avg = population_orgs.select_dict['wt']/counts['wt']
+      wt_avg = fitnesses['wt']/counts['wt']
     else:
       wt_avg = 0
     if counts['uncond']:
-      uncond_avg =  population_orgs.select_dict['uncond']/counts['uncond']
+      uncond_avg =  fitnesses['uncond']/counts['uncond']
     else:
       uncond_avg = 0
     data_file.write('{} {} {} {} {} {} {} {} {}\n'.format(u, ai_prob, coop_prob, neigh_prop, age_avg, total, def_avg, wt_avg, uncond_avg))
