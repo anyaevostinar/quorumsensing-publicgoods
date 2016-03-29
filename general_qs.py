@@ -292,6 +292,7 @@ data_file = open(filename+str(seed)+".dat", 'w')
 data_file.write("Update AI_Prob Coop_Prob Num_Neigh Avg_Repo_Age Total Select_Def Select_WT Select_Uncond\n")
 data_file.close()
 pop_file = open(filename+str(seed)+"pop.dat", "w")
+pop_file.write("map\n")
 population_orgs = Population(pop_size,proportions)
 
 for u in range(num_updates):
@@ -300,7 +301,7 @@ for u in range(num_updates):
   if u%100 == 0:
     flat_pop = processPop(population_orgs.orgs)
     #print flat_pop
-    pop_file.write(str(flat_pop)+"\n")
+    pop_file.write('"'+str(flat_pop)+'"\n')
       #grab current averages
     ai_prob, coop_prob, neigh_prop, age_avg, total, counts, fitnesses = population_orgs.recordStats()
     #print "Update: ", u, " AI Prob: ", ai_prob, " Coop Prob: ", coop_prob, " Neighbor Prop: ", neigh_prop, " Avg Repo Age: ", age_avg, " Total Orgs: ", total
