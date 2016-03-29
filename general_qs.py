@@ -225,7 +225,7 @@ class Population:
     coop_prob_sum = 0.0
     neigh_prop_sum = 0.0
     repo_age_sum = 0.0
-    counts = {"defector":0.0, "wt": 0.0, "ancestor":0.0, "uncond":0.0, "empty":0.0, "ancestor":0.0}
+    counts = {"defector":0.0, "wt": 0.0, "ancestor":0.0, "uncond":0.0, "empty":0.0}
     fitnesses = {"defector":0.0, "wt":0.0, "ancestor":0.0, "uncond":0.0, "empty":0.0}
 
     for org in self.orgs:
