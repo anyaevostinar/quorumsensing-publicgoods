@@ -8,8 +8,9 @@ import copy
 
 class Organism:
   '''A class to contain an organism'''
-  def __init__(self, cellID, ai_prob = 0.5, coop_prob = 0.5, neigh_prop = 0.6, parent=None, empty=False, lineage = 'evolvable'):
+  def __init__(self, cellID, ai_prob = 0.5, coop_prob = 0.5, neigh_prop = 0.6, parent=None, empty=False, lineage = 'evolvable', num_lin = 0):
     self.age = 0
+    self.num_lin = num_lin
     self.generation = 0
     self.ai_prob = ai_prob
     self.coop_prob = coop_prob
@@ -23,6 +24,7 @@ class Organism:
     if not self.empty:
       if parent:
         self.ai_prob = parent.ai_prob
+        self.num_lin = parent.num_lin
         self.coop_prob = parent.coop_prob
         self.neigh_prop = parent.neigh_prop
         self.mutate()
@@ -160,15 +162,15 @@ class Population:
     unconditional = AI 0 Coop_Prob 0.1 Neigh_Prop 0
     defector = AI 0 Coop_Prob 0.0 Neigh_Prop 1.0'''
     if org_type == "ancestor":
-      newOrg = Organism(len(self.orgs), ai_prob = 0.0, coop_prob = 0.0, neigh_prop = 0.0, lineage='ancestor')
+      newOrg = Organism(len(self.orgs), ai_prob = 0.0, coop_prob = 0.0, neigh_prop = 0.0, lineage='ancestor', num_lin = 0)
     elif org_type == "wt":
-      newOrg = Organism(len(self.orgs), ai_prob = 1.0, coop_prob = 0.5, neigh_prop = 0.6, lineage='wt')
+      newOrg = Organism(len(self.orgs), ai_prob = 1.0, coop_prob = 0.5, neigh_prop = 0.6, lineage='wt', num_lin=1)
     elif org_type == "unconditional":
-      newOrg = Organism(len(self.orgs), ai_prob = 0.0, coop_prob = 0.5, neigh_prop = 0.0, lineage='uncond')
+      newOrg = Organism(len(self.orgs), ai_prob = 0.0, coop_prob = 0.5, neigh_prop = 0.0, lineage='uncond', num_lin=2)
     elif org_type == "defector":
-      newOrg = Organism(len(self.orgs), ai_prob = 0.0, coop_prob = 0.0, neigh_prop = 1.0, lineage = 'defector')
+      newOrg = Organism(len(self.orgs), ai_prob = 0.0, coop_prob = 0.0, neigh_prop = 1.0, lineage = 'defector', num_lin = 3)
     elif org_type == "empty":
-      newOrg= Organism(len(self.orgs), empty = True, lineage = 'empty')
+      newOrg= Organism(len(self.orgs), empty = True, lineage = 'empty', num_lin = 4)
     else:
       print "Invalid organism selected, making ancestor"
       newOrg = Organism(len(self.orgs), ai_prob = 0.0, coop_prob = 0.0, neigh_prop = 0.0, lineage = 'ancestor')
@@ -178,7 +180,7 @@ class Population:
     '''A helper function to reproduce a host organism.'''
     ## Time to reproduce
     ## Returns list of neighbor indices
-    dead_neighbor = False
+    '''    dead_neighbor = False
     neighbors = org.findNeighbors()
     for ID in neighbors:
       if self.orgs[ID].empty:
@@ -187,7 +189,8 @@ class Population:
     if dead_neighbor:
       position = dead_neighbor
     else:
-      position = random.choice(neighbors)
+      position = random.choice(neighbors)'''
+    position = random.randrange(self.popsize)
     newOrg = Organism(position, parent = org)
 
     self.orgs[position] = newOrg
@@ -262,6 +265,12 @@ def parseArgs(parser):
   return args
 
 
+def processPop(orgs):
+
+  flat_world = []
+  for org in orgs:
+    flat_world.append(org.num_lin)
+  return flat_world
 
 parser = argparse.ArgumentParser(description='Simulate evolution of quorum sensing controlled public goods')
 args = parseArgs(parser)
@@ -282,16 +291,19 @@ proportions = {'wt':args.proportion_wt, 'defector':args.proportion_def, 'uncondi
 data_file = open(filename+str(seed)+".dat", 'w')
 data_file.write("Update AI_Prob Coop_Prob Num_Neigh Avg_Repo_Age Total Select_Def Select_WT Select_Uncond\n")
 data_file.close()
+pop_file = open(filename+str(seed)+"pop.dat", "w")
 population_orgs = Population(pop_size,proportions)
 
 for u in range(num_updates):
     
   population_orgs.update()
   if u%100 == 0:
-
+    flat_pop = processPop(population_orgs.orgs)
+    #print flat_pop
+    pop_file.write(str(flat_pop)+"\n")
       #grab current averages
     ai_prob, coop_prob, neigh_prop, age_avg, total, counts, fitnesses = population_orgs.recordStats()
-    print "Update: ", u, " AI Prob: ", ai_prob, " Coop Prob: ", coop_prob, " Neighbor Prop: ", neigh_prop, " Avg Repo Age: ", age_avg, " Total Orgs: ", total
+    #print "Update: ", u, " AI Prob: ", ai_prob, " Coop Prob: ", coop_prob, " Neighbor Prop: ", neigh_prop, " Avg Repo Age: ", age_avg, " Total Orgs: ", total
     data_file = open(filename+str(seed)+".dat", 'a')
 
     if counts['defector']:
